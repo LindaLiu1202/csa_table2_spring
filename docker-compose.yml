@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    image: java_springv1
+    image: t2_spring_8192
     build: .
     ports:
       - "8192:8192"
@@ -14,4 +14,4 @@ volumes:
     driver_opts:
       o: bind
       type: none
-      device: /home/ubuntu/spring_portfolio/volumes
+      device: /home/ubuntu/tri2/t2_spring_8192/volumes
