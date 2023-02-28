@@ -8,6 +8,10 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
 import java.text.SimpleDateFormat;
 
 @RestController
@@ -46,6 +50,7 @@ public class PersonApiController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);       
     }
 
+
     /*
     DELETE individual Person using ID
      */
@@ -61,14 +66,14 @@ public class PersonApiController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
     }
 
+    
     /*
     POST Aa record by Requesting Parameters from URI
      */ @PostMapping( "/post")
     public Person postPerson(@RequestBody Person person) {
-        //encrypt password
+        //will encrypt the password and encrypted password will go into the database
         String password = person.getPassword(); 
         password = BCrypt.hashpw(password, BCrypt.gensalt());
-        //create a person object to save in the database (along with many to many mapping to roles)
         Person person2 = new Person( person.getEmail(), password, person.getName(), person.getDob());
         return repository.save(person2); 
     }
@@ -118,5 +123,33 @@ public class PersonApiController {
         }
         // return Bad ID
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST); 
+    }
+
+    @PostMapping( "/update/id")
+    public Person update(@RequestBody Person person) {
+        Optional<Person> person1 = repository.findById(person.getId()); 
+        Person newPerson = person1.orElse(null);
+        
+        // if the email is changed and new email provided then change the email in database
+        if (person.getEmail() != null) {
+            newPerson.setEmail(person.getEmail());
+        }
+ // if the name is changed and new name provided then change the name in database
+        if (person.getName() != null) {
+            newPerson.setName(person.getName());
+        }
+ // if the password is changed and new password provided then change the password in database
+        if (person.getPassword() != null) {
+            String password = person.getPassword(); 
+             // encrypt password and then put into database
+            password = BCrypt.hashpw(password, BCrypt.gensalt());
+            newPerson.setPassword(password);
+        }
+ // if the dob is changed and new dob provided then change the dob in database
+        if (person.getDob() != null) {
+            newPerson.setDob(person.getDob());
+        }
+
+        return repository.save(newPerson); 
     }
 }
